@@ -21,7 +21,7 @@ Algorithm FloydWarshall(W, n):
 "Show iterative updates of distance matrix in Floyd-Warshall algorithm."
 
 ## Output
-![Floyd-Warshall Matrix Updates](Visualization.png)
+![Floyd-Warshall Matrix Updates](visualization/Visualization.png)
 
 ## Learning Outcome
 - Understood optimal substructure in graph problems via dynamic programming.
