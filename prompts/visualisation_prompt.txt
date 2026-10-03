@@ -1,0 +1,27 @@
+Create a colourful and professional educational visualization of the Floyd-Warshall algorithm.
+
+Show the distance matrix changing step by step as each vertex A, B, C and D is used as an intermediate vertex.
+
+Show:
+
+Initial Matrix
+↓
+Using A
+↓
+Using B
+↓
+Using C
+↓
+Using D
+↓
+Final Matrix
+
+Highlight the values that change at each step.
+
+Include the formula:
+
+dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+Use a bright, clean, modern style with readable fonts, colourful highlights and a white background.
+
+Make it suitable for a college Computer Science presentation.

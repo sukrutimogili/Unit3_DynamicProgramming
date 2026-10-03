@@ -1,0 +1,17 @@
+Explain the Floyd-Warshall algorithm in a simple and easy-to-understand way.
+
+Include:
+- Problem statement
+- Basic idea
+- Step-by-step algorithm
+- Pseudocode
+- Time complexity
+- Space complexity
+
+Use a simple example with 4 vertices: A, B, C and D.
+
+Explain the formula:
+
+dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j])
+
+Keep the explanation suitable for a college assignment and avoid unnecessary technical details.

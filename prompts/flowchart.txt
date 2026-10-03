@@ -1,0 +1,35 @@
+Create a colourful and professional flowchart for the Floyd-Warshall algorithm.
+
+Show these steps:
+
+Start
+↓
+Initialize distance matrix
+↓
+Set k
+↓
+Set i
+↓
+Set j
+↓
+Check:
+dist[i][k] + dist[k][j] < dist[i][j]?
+↓
+Update distance if smaller
+↓
+Move to next j
+↓
+Move to next i
+↓
+Move to next k
+↓
+Display final distance matrix
+↓
+End
+
+Use standard flowchart shapes:
+- Oval for Start/End
+- Rectangle for Process
+- Diamond for Decision
+
+Use bright colours, clean typography, clear arrows and a simple professional college-project style.
