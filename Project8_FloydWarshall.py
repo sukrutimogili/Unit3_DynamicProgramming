@@ -1,9 +1,5 @@
-"""
-Project 8: All-Pairs Shortest Path Matrix Update (Floyd-Warshall)
-Computes intermediate distance matrices and saves Visualization.png.
-"""
-
-import matplotlib.pyplot as plt
+import zlib
+import struct
 
 INF = 99999
 
@@ -22,46 +18,68 @@ def floyd_warshall(graph):
         history.append((k + 1, [row[:] for row in dist], updated))
     return dist, history
 
-def render_plot(history, output_file="Visualization.png"):
-    steps = len(history)
-    fig, axes = plt.subplots(1, steps, figsize=(3.8 * steps, 4.2))
-    if steps == 1:
-        axes = [axes]
+def write_ppm(history, filename="temp.ppm"):
+    cell_w, cell_h = 60, 40
+    cols = 4
+    margin = 25
+    total_w = len(history) * (cols * cell_w + margin) + margin
+    total_h = cols * cell_h + 80
+    
+    img = [[[255, 255, 255] for _ in range(total_w)] for _ in range(total_h)]
 
     for idx, (step, mat, updated) in enumerate(history):
-        ax = axes[idx]
-        title = r"$D^{(0)}$ (Initial)" if step == 0 else rf"$D^{{({step})}}$ (via $V_{step}$)"
-        ax.set_title(title, fontsize=11, fontweight="bold", pad=8)
-        
-        n = len(mat)
-        ax.set_xlim(-0.5, n - 0.5)
-        ax.set_ylim(n - 0.5, -0.5)
-        ax.set_xticks(range(n))
-        ax.set_yticks(range(n))
-        ax.set_xticklabels([f"V{i+1}" for i in range(n)])
-        ax.set_yticklabels([f"V{i+1}" for i in range(n)])
-        ax.tick_params(left=False, bottom=False)
+        start_x = margin + idx * (cols * cell_w + margin)
+        start_y = 50
 
-        for i in range(n):
-            for j in range(n):
-                val = mat[i][j]
-                val_str = r"$\infty$" if val >= INF else str(val)
-                is_upd = (i, j) in updated
+        for r in range(cols):
+            for c in range(cols):
+                is_upd = (r, c) in updated
+                is_pivot = (step > 0) and (r == step - 1 or c == step - 1)
                 
-                # Highlight relaxed cells in green, current intermediate vertex row/col in grey
-                bg = "#c8e6c9" if is_upd else ("#f5f5f5" if step > 0 and (i == step - 1 or j == step - 1) else "white")
-                ax.add_patch(plt.Rectangle((j - 0.5, i - 0.5), 1, 1, facecolor=bg, edgecolor="#999999", lw=0.8))
-                ax.text(j, i, val_str, ha="center", va="center", fontsize=10, 
-                        color="darkgreen" if is_upd else "black",
-                        fontweight="bold" if is_upd else "normal")
+                bg = [200, 230, 201] if is_upd else ([240, 240, 240] if is_pivot else [255, 255, 255])
+                
+                for y in range(start_y + r * cell_h, start_y + (r + 1) * cell_h):
+                    for x in range(start_x + c * cell_w, start_x + (c + 1) * cell_w):
+                        if y == start_y + r * cell_h or x == start_x + c * cell_w:
+                            img[y][x] = [180, 180, 180]
+                        else:
+                            img[y][x] = bg
 
-    plt.suptitle("Floyd-Warshall Stepwise Distance Matrix Updates", fontsize=13, fontweight="bold", y=1.02)
-    plt.tight_layout()
-    plt.savefig(output_file, dpi=300, bbox_inches="tight")
-    print(f"[OK] Generated: {output_file}")
+    with open(filename, "wb") as f:
+        f.write(f"P6\n{total_w} {total_h}\n255\n".encode())
+        for row in img:
+            for pixel in row:
+                f.write(bytes(pixel))
+
+def ppm_to_png(ppm_path, png_path):
+    with open(ppm_path, "rb") as f:
+        _ = f.readline()
+        dims = f.readline().decode().strip().split()
+        _ = f.readline()
+        w, h = int(dims[0]), int(dims[1])
+        data = f.read()
+
+    raw_data = bytearray()
+    idx = 0
+    for _ in range(h):
+        raw_data.append(0)
+        raw_data.extend(data[idx:idx + w * 3])
+        idx += w * 3
+
+    compressed = zlib.compress(raw_data)
+    
+    def chunk(tag, content):
+        return struct.pack(">I", len(content)) + tag + content + struct.pack(">I", zlib.crc32(tag + content) & 0xffffffff)
+
+    png_bytes = b"\x89PNG\r\n\x1a\n"
+    png_bytes += chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0))
+    png_bytes += chunk(b"IDAT", compressed)
+    png_bytes += chunk(b"IEND", b"")
+
+    with open(png_path, "wb") as f:
+        f.write(png_bytes)
 
 if __name__ == "__main__":
-    # Directed weighted graph representation
     graph = [
         [0, 3, INF, 7],
         [8, 0, 2, INF],
@@ -69,4 +87,9 @@ if __name__ == "__main__":
         [2, INF, INF, 0]
     ]
     _, history = floyd_warshall(graph)
-    render_plot(history, output_file="Visualization.png")
+    write_ppm(history, "temp.ppm")
+    ppm_to_png("temp.ppm", "Visualization.png")
+    import os
+    if os.path.exists("temp.ppm"):
+        os.remove("temp.ppm")
+    print("[OK] Generated Visualization.png without external libraries.")
